@@ -1,5 +1,5 @@
 const Course = require("../models/Course");
-const Tag = require("../models/Tag");
+const Category = require("../models/Category");
 const User = require("../models/User");
 const Section = require("../models/Section");
 const {uploadImageToCloudinary} = require("../Utils/imageUploader");
@@ -9,10 +9,10 @@ require("dotenv").config();
 
 exports.createCourse = async (req,res)=>{
     try{
-        const {courseName,courseDescription,whatYouWillLearn,price,tag} = req.body;
+        const {courseName,courseDescription,whatYouWillLearn,price,category} = req.body;
         const thumbNail = req.files.thumbNailImage;
 
-        if(!courseName || !courseDescription||!whatYouWillLearn||!price||!tag||!thumbNail){
+        if(!courseName || !courseDescription||!whatYouWillLearn||!price||!category||!thumbNail){
             return res.status(400).json({
                 success:false,
                 message:"all fields are required"
@@ -29,11 +29,11 @@ exports.createCourse = async (req,res)=>{
                 message:"Instructor Details Are not found"
             })
         }
-        const tagDetails = await Tag.find({tagName:tag});
-        if(!tagDetails){
+        const categoryDetails = await Tag.find({categoryName:tag});
+        if(!categoryDetails){
             return res.status(404).json({
                 success:false,
-                message:"Tag not found"
+                message:"category not found"
             })
         }
         
@@ -45,7 +45,7 @@ exports.createCourse = async (req,res)=>{
             instructor:instructorDetails._id,
             whatYouWillLearn,
             price,
-            tag:tagDetails._id,
+            tag:categoryDetails._id,
             thumbNail:thumbnailimage.secure_url,
         })
 
@@ -59,8 +59,8 @@ exports.createCourse = async (req,res)=>{
             {new:true},
         )
 
-        await Tag.findByIdAndUpdate(
-            {_id:tagDetails._id},
+        await Category.findByIdAndUpdate(
+            {_id:categoryDetails._id},
             {
                 $push:{
                     courses:newCourse._id,
