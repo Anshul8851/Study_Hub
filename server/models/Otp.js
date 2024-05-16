@@ -7,20 +7,21 @@ const otpSchema = new mongoose.Schema({
         required:true,
     },
     otpValue:{
-        type:Number,
-        required:true
+        type:String,
+        required:true,
     },
     createdAt:{
         type:Date,
         default:Date.now(),
-        expires:5*60*1000
+        expires:5*60,
     }
 });
 
 async function sendVerificationEmail(email,otp){
     try{
+        // console.log(email,otp);
         const mailResponse = await mailSender(email,"Verification email from Study-Hub",otp);
-        console.log("Email send successfully",mailResponse);
+        // console.log("Email send successfully",mailResponse);
     }
     catch(error){
         console.log(error);
@@ -28,8 +29,12 @@ async function sendVerificationEmail(email,otp){
     }
 }
 
-otpSchema.pre('save',async function(next){
-    await sendVerificationEmail(this.email,this.otp);
+otpSchema.pre("save",async function(next){
+    console.log("new otp saved");
+    if (this.isNew) {
+        // console.log(this);
+		await sendVerificationEmail(this.email, this.otpValue);
+	}
     next();
 })
 

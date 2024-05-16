@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const mailSender = require("../Utils/mailSender");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 exports.resetPasswordToken = async(req,res)=>{
     try{
@@ -16,11 +17,14 @@ exports.resetPasswordToken = async(req,res)=>{
 
         const token = crypto.randomUUID();
         
-        const updatedDetails = await User.findOneAndUpdate({email},{token:token,
-                                                                    resetTokenExpiresIn:Date.now()+5*60*1000},
+        const updatedDetails = await User.findOneAndUpdate({email},{
+                                                                    token:token,
+                                                                    resetTokenExpiresIn:Date.now()+5*60*1000,
+                                                                },
                                                                     {new:true});
         
-        
+        // console.log(updatedDetails);
+
         const url = `http://localhost:3000/update-password/${token}`
         
         await mailSender(email,
@@ -52,13 +56,16 @@ exports.resetPassword = async(req,res)=>{
                 message:"password incorrect"
             })
         }
-        const userDetails = await User.find({token});
+        const userDetails = await User.findOne({token});
         if(!userDetails){
             return res.json({
                 success:false,
                 message:"user does not exist"
             })
         }
+        // console.log("USERDETAILS:",userDetails);
+        // console.log(userDetails.resetTokenExpiresIn);
+        // console.log(Date.now());
         if(userDetails.resetTokenExpiresIn < Date.now()){
             return res.json({
                 success:false,

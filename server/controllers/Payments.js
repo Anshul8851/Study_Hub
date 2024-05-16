@@ -3,7 +3,7 @@ const User = require("../models/User");
 const mailSender = require("../Utils/mailSender");
 const Course = require("../models/Course");
 const {courseEnrollmentEmail} = require("../mail/templates/courseEnrollmentEmail");
-const { default: mongoose } = require("mongoose");
+// const { default: mongoose } = require("mongoose");
 
 exports.capturePayment = async(req,res)=>{
     try{
@@ -26,7 +26,7 @@ exports.capturePayment = async(req,res)=>{
                     message:"course not exists",
                 })
             }
-            const userid = new mongoose.Types.ObjectId(userId);
+            const userid = userId;
             if(course.studentsEnrolled.includes(userid)){
                 return res.status(200).json({
                     success:false,

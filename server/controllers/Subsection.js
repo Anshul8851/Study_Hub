@@ -1,6 +1,7 @@
 const Section = require("../models/Section");
 const SubSection = require("../models/SubSection");
 const {uploadImageToCloudinary} = require("../Utils/imageUploader");
+const mongoose = require("mongoose");
 require("dotenv").config();
 
 exports.createSubSection = async(req,res)=>{
@@ -20,24 +21,27 @@ exports.createSubSection = async(req,res)=>{
             description,
             videoUrl:uploadDetails.secure_url,
         })
-
+       console.log("new sub section :",newSubSection);
         const updatedSection = await Section.findByIdAndUpdate(sectionId,
                                                         {
                                                             $push:{
-                                                                subSection:newSubSection._id,      
+                                                                subSections:newSubSection._id,      
                                                             }
-                                                        },{new:true});
+                                                        },{new:true}).populate("subSections");
 
-        
+        console.log("updated section",updatedSection);
         return res.status(200).json({
             success:true,
-            message:"subsection created successfully"
+            message:"subsection created successfully",
+            updatedSection
         })
     }
     catch(error){
+        console.log(error);
         return res.status(500).json({
             success:false,
             message:"subsection not created try again",
+            errorMessage:error.message
         })
     }
 }   

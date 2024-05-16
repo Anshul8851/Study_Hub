@@ -29,7 +29,7 @@ exports.createCourse = async (req,res)=>{
                 message:"Instructor Details Are not found"
             })
         }
-        const categoryDetails = await Tag.find({categoryName:tag});
+        const categoryDetails = await Category.findById(category);
         if(!categoryDetails){
             return res.status(404).json({
                 success:false,
@@ -45,7 +45,7 @@ exports.createCourse = async (req,res)=>{
             instructor:instructorDetails._id,
             whatYouWillLearn,
             price,
-            tag:categoryDetails._id,
+            category,
             thumbNail:thumbnailimage.secure_url,
         })
 
@@ -112,55 +112,28 @@ exports.showAllCourses = async(req,res)=>{
     }
 }
 
-exports.createSection = async(req,res)=>{
+
+
+exports.getCourseDetails = async(req,res)=>{
     try{
-        const{sectionName,courseId} = req.body;
-        if(!sectionName || !courseId){
+        const {courseId} = req.body;
+        const courseDetails = await Course.findById(courseId)
+                                        .populate({path:"instructor",populate:{path:"additionalDetails"}})
+                                        .populate({path:"courseContent",populate:{path:"subSections"},})
+                                        .populate("courseRating")
+                                        .populate("category").populate("studentsEnrolled");
+
+        if(!courseDetails){
             return res.status(400).json({
                 success:false,
-                message:"please provide all the details",
-            })
-        }
-        const newSection = await Section.create({sectionName});
-        
-        const updatedCourseDetails = await Course.findByIdAndUpdate     (courseId,{
-            $push:{
-                courseContent:newSection._id,
-            }
-        },{new:true}).populate({path:"courseContent",populate:{path:"subSection"},});
-
-        return res.status(200).json({
-            success:true,
-            message:"Section created successfully",
-            updatedCourseDetails,
-        })
-
-    }
-    catch(error){
-        console.log(error);
-        return res.status(500).json({
-            success:false,
-            message:error.message,
-        })
-    }
-}
-
-// create handler function for updateSection
-
-exports.updateSection = async(req,res)=>{
-    try{
-        const{sectionName,sectionId} = req.body;
-        if(!sectionName || !sectionId){
-            return res.status(400).json({
-                success:false,
-                message:"please provide all fields",
+                message:"course not found",
             })
         }
 
-        const newSectionData = await Section.findByIdAndUpdate(sectionId,{sectionName},{new:true});
         return res.status(200).json({
             success:true,
-            message:"section updated successfully",
+            message:"course details fetched successfully",
+            data:courseDetails,
         })
     }
     catch(error){
@@ -168,24 +141,6 @@ exports.updateSection = async(req,res)=>{
         return res.status(500).json({
             success:false,
             message:error.message,
-        })
-    }
-}
-
-exports.deleteSection = async(req,res)=>{
-    try{
-        const{sectionId} = req.params;
-        await Section.findByIdAndDelete(sectionId);
-        return res.status(200).json({
-            success:true,
-            message:"section deleted successfully"
-        })
-    }
-    catch(error){
-        console.log(error);
-        return res.status(500).json({
-            success:false,
-            message:"section not created please try again"
         })
     }
 }

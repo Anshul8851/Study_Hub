@@ -18,14 +18,14 @@ exports.sendOtp = async (req,res) =>{
                 message:"User already exists",
             })
         }
-        let otp = otpGenerator.generate(6,{
+        var otp = otpGenerator.generate(6,{
             upperCaseAlphabets:false,
             lowerCaseAlphabets:false,
             specialChars:false
         });
         console.log(otp);
 
-        const result = await Otp.findOne({otp});
+        const result = await Otp.findOne({otpValue:otp});
         while(result){
             otp = otpGenerator.generate(6,{
                 upperCaseAlphabets:false,
@@ -35,8 +35,9 @@ exports.sendOtp = async (req,res) =>{
             result = await Otp.findOne({otp});
         }
         // create an entry of new otp in db
-        const newOtp = await Otp.create({email,otp});
-        console.log(newOtp);
+        const newOtp = await Otp.create({email,otpValue:otp});
+        console.log("new otp",newOtp);
+    
         res.status(200).json({
             success:true,
             message:"otp sent successfully",
@@ -57,8 +58,8 @@ exports.sendOtp = async (req,res) =>{
 exports.signUp = async (req,res) =>{
     // console.log(req.body);
     try{
-        const {firstName,lastName,email,password,confirmPassword,accountType,contactNumber,otp} = req.body;
-    if(!firstName || !lastName || !email || !password||!confirmPassword || !accountType ||!contactNumber||!otp){
+        const {firstName,lastName,email,password,confirmPassword,accountType,otp,contactNumber=""} = req.body;
+    if(!firstName || !lastName || !email || !password||!confirmPassword || !accountType ||!otp){
         return res.status(400).json({
             success:false,
             message:"all fields are required",
@@ -81,12 +82,21 @@ exports.signUp = async (req,res) =>{
     }
 
     const recentOtp = await Otp.find({email}).sort({createdAt:-1}).limit(1);
-    if(recentOtp.length ==  0 || otp !== recentOtp){
+    console.log("OTP: ",otp);
+    console.log(recentOtp);
+    if (recentOtp.length === 0) {
+        // OTP not found for the email
         return res.status(400).json({
-            success:false,
-            message:"invalid otp",
+          success: false,
+          message: "The OTP is not valid",
         })
-    }
+      } else if (otp !== recentOtp[0].otpValue) {
+        // Invalid OTP
+        return res.status(400).json({
+          success: false,
+          message: "The OTP is not valid",
+        })
+      }
 
     const hashedPassword = await bcrypt.hash(password,10);
 
@@ -181,6 +191,6 @@ exports.login = async(req,res) =>{
 }
 
 // change password
-exports.changePassword = async(req,res) =>{
+// exports.changePassword = async(req,res) =>{
 
-}
+// }
