@@ -8,6 +8,7 @@ import ForgotPassword from './components/Common/ForgotPassword';
 import UpdatePassword from './components/Common/UpdatePassword';
 import SignupForm from './components/Common/SignupForm';
 import VerifyEmail from './components/Common/VerifyEmail';
+import About from './components/Common/About';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path='/forgot-password' element={<ForgotPassword/>}/>
         <Route path='/update-password/:id' element={<UpdatePassword/>}/>
         <Route path='/verify-email' element={<VerifyEmail/>}/>
+        <Route path='/about' element={<About/>}/>
       </Routes>
     </div>
   );

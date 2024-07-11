@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     loading : false,
-    signupDate : null,
+    signupData : null,
     token: localStorage.getItem("token")?JSON.parse(localStorage.getItem("token")) : null,
 };
 export const authSlice = createSlice({
@@ -16,7 +16,7 @@ export const authSlice = createSlice({
             state.loading = value.payload;
         },
         setSignupData(state,value){
-            state.signupDate = value.payload;
+            state.signupData = value.payload;
         }
     },
  });
